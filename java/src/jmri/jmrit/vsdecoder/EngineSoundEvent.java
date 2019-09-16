@@ -10,22 +10,21 @@ import org.slf4j.LoggerFactory;
 /**
  * <hr>
  * This file is part of JMRI.
- * <P>
+ * <p>
  * JMRI is free software; you can redistribute it and/or modify it under 
  * the terms of version 2 of the GNU General Public License as published 
  * by the Free Software Foundation. See the "COPYING" file for a copy
  * of this license.
- * <P>
+ * <p>
  * JMRI is distributed in the hope that it will be useful, but WITHOUT 
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
  * for more details.
- * <P>
  *
  * @author Mark Underwood Copyright (C) 2011
  * @author Klaus Killinger Copyright (C) 2018
  */
-public class EngineSoundEvent extends SoundEvent implements PropertyChangeListener {
+public class EngineSoundEvent extends SoundEvent {
 
     EnginePane engine_pane;
 
@@ -130,10 +129,14 @@ public class EngineSoundEvent extends SoundEvent implements PropertyChangeListen
         }
     }
 
+    @Override
     public void propertyChange(PropertyChangeEvent event) {
         super.propertyChange(event);
         if (event.getPropertyName().equals("SpeedSetting")) {
             ((EngineSound) parent.getSound("ENGINE")).handleSpeedChange((Float) event.getNewValue(), engine_pane);
+        } else if (event.getPropertyName().equals("IsForward")) {
+            ((EngineSound) parent.getSound("ENGINE")).changeLocoDirection((Boolean) event.getNewValue() ? 1 : -1);
+            log.debug("is forward: {}", event.getNewValue());
         } else if (event.getPropertyName().startsWith("F")) {
             String ev = event.getPropertyName();
             boolean val = (Boolean) event.getNewValue();

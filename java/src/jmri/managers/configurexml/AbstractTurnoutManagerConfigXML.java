@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides the abstract base and store functionality for configuring
  * TurnoutManagers, working with AbstractTurnoutManagers.
- * <P>
+ * <p>
  * Typically, a subclass will just implement the load(Element turnouts) class,
  * relying on implementation here to load the individual turnouts. Note that
  * these are stored explicitly, so the resolution mechanism doesn't need to see
@@ -48,8 +48,8 @@ public abstract class AbstractTurnoutManagerConfigXML extends AbstractNamedBeanM
             TurnoutOperationManagerXml tomx = new TurnoutOperationManagerXml();
             Element opElem = tomx.store(InstanceManager.getDefault(TurnoutOperationManager.class));
             turnouts.addContent(opElem);
-            java.util.Iterator<String> iter
-                    = tm.getSystemNameAddedOrderList().iterator();
+            java.util.Iterator<Turnout> iter
+                    = tm.getNamedBeanSet().iterator();
 
             // don't return an element if there are not turnouts to include
             if (!iter.hasNext()) {
@@ -63,9 +63,9 @@ public abstract class AbstractTurnoutManagerConfigXML extends AbstractNamedBeanM
 
             // store the turnouts
             while (iter.hasNext()) {
-                String sname = iter.next();
+                Turnout t = iter.next();
+                String sname = t.getSystemName();
                 log.debug("system name is " + sname);
-                Turnout t = tm.getBySystemName(sname);
                 Element elem = new Element("turnout");
                 elem.addContent(new Element("systemName").addContent(sname));
                 log.debug("store turnout " + sname);
@@ -173,7 +173,6 @@ public abstract class AbstractTurnoutManagerConfigXML extends AbstractNamedBeanM
      * @param perNode Element containing per-node Turnout data.
      * @return true if succeeded
      */
-    @SuppressWarnings("unchecked")
     public boolean loadTurnouts(Element shared, Element perNode) {
         boolean result = true;
         List<Element> operationList = shared.getChildren("operations");
@@ -240,17 +239,8 @@ public abstract class AbstractTurnoutManagerConfigXML extends AbstractNamedBeanM
             // Load common parts
             loadCommon(t, elem);
 
-            // now add feedback if needed
+            // now configure feedback if needed
             Attribute a;
-            a = elem.getAttribute("feedback");
-            if (a != null) {
-                try {
-                    t.setFeedbackMode(a.getValue());
-                } catch (IllegalArgumentException e) {
-                    log.error("Can not set feedback mode: '" + a.getValue() + "' for turnout: '" + sysName + "' user name: '" + (userName == null ? "" : userName) + "'");
-                    result = false;
-                }
-            }
             a = elem.getAttribute("sensor1");
             if (a != null) {
                 try {
@@ -264,6 +254,15 @@ public abstract class AbstractTurnoutManagerConfigXML extends AbstractNamedBeanM
                 try {
                     t.provideSecondFeedbackSensor(a.getValue());
                 } catch (jmri.JmriException e) {
+                    result = false;
+                }
+            }
+            a = elem.getAttribute("feedback");
+            if (a != null) {
+                try {
+                    t.setFeedbackMode(a.getValue());
+                } catch (IllegalArgumentException e) {
+                    log.error("Can not set feedback mode: '" + a.getValue() + "' for turnout: '" + sysName + "' user name: '" + (userName == null ? "" : userName) + "'");
                     result = false;
                 }
             }

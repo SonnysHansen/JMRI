@@ -14,27 +14,25 @@ import org.slf4j.LoggerFactory;
 public class MarklinTurnoutManager extends jmri.managers.AbstractTurnoutManager {
 
     public MarklinTurnoutManager(MarklinSystemConnectionMemo memo) {
-
-        adaptermemo = memo;
-        prefix = adaptermemo.getSystemPrefix();
-        tc = adaptermemo.getTrafficController();
+        super(memo);
+        tc = memo.getTrafficController();
     }
 
     MarklinTrafficController tc;
-    MarklinSystemConnectionMemo adaptermemo;
 
-    String prefix;
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String getSystemPrefix() {
-        return prefix;
+    public MarklinSystemConnectionMemo getMemo() {
+        return (MarklinSystemConnectionMemo) memo;
     }
 
     @Override
     public Turnout createNewTurnout(String systemName, String userName) {
         int addr;
         try {
-            addr = Integer.valueOf(systemName.substring(getSystemPrefix().length() + 1)).intValue();
+            addr = Integer.parseInt(systemName.substring(getSystemPrefix().length() + 1));
         } catch (java.lang.NumberFormatException e) {
             log.error("failed to convert systemName " + systemName + " to a turnout address");
             return null;

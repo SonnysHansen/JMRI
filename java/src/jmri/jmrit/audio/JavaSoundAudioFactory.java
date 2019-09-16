@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
  * JMRI is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * <p>
  *
  * @author Matthew Harris copyright (c) 2009
  */
@@ -54,39 +53,45 @@ public class JavaSoundAudioFactory extends AbstractAudioFactory {
         }
 
         // Initialise JavaSound
-        if (mixer == null) {
+        if (JavaSoundAudioFactory.mixer == null) {
             // Iterate through possible mixers until we find the one we require
             for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
                 if (mixerInfo.getName().equals("Java Sound Audio Engine")) {
-                    mixer = AudioSystem.getMixer(mixerInfo);
+                    JavaSoundAudioFactory.setMixer(AudioSystem.getMixer(mixerInfo));
                     break;
                 }
             }
         }
         // Check to see if a suitable mixer has been found
-        if (mixer == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("No JavaSound audio system found.");
-            }
+        if (JavaSoundAudioFactory.mixer == null) {
+            log.debug("No JavaSound audio system found.");
             return false;
         } else {
             if (log.isInfoEnabled()) {
                 log.info("Initialised JavaSound:"
-                        + " vendor - " + mixer.getMixerInfo().getVendor()
-                        + " version - " + mixer.getMixerInfo().getVersion());
+                        + " vendor - " + JavaSoundAudioFactory.mixer.getMixerInfo().getVendor()
+                        + " version - " + JavaSoundAudioFactory.mixer.getMixerInfo().getVersion());
             }
         }
 
         super.init();
-        initialised = true;
+        setInit(true);
         return true;
+    }
+
+    private synchronized static void setInit(boolean newVal) {
+        initialised = newVal;
+    }
+
+    private synchronized static void setMixer(Mixer newMixer) {
+        mixer = newMixer;
     }
 
     @Override
     public String toString() {
         return "JavaSoundAudioFactory:"
-                + " vendor - " + mixer.getMixerInfo().getVendor()
-                + " version - " + mixer.getMixerInfo().getVersion();
+                + " vendor - " + JavaSoundAudioFactory.mixer.getMixerInfo().getVendor()
+                + " version - " + JavaSoundAudioFactory.mixer.getMixerInfo().getVersion();
     }
 
     @Override
@@ -100,12 +105,10 @@ public class JavaSoundAudioFactory extends AbstractAudioFactory {
         AudioManager am = InstanceManager.getDefault(jmri.AudioManager.class);
 
         // Retrieve list of Audio Objects and remove the sources
-        List<String> audios = am.getSystemNameList();
-        for (String audioName : audios) {
-            Audio audio = am.getAudio(audioName);
+        for (Audio audio : am.getNamedBeanSet()) {
             if (audio.getSubType() == Audio.SOURCE) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Removing JavaSoundAudioSource: " + audioName);
+                    log.debug("Removing JavaSoundAudioSource: " + audio.getSystemName());
                 }
                 // Cast to JavaSoundAudioSource and cleanup
                 ((JavaSoundAudioSource) audio).cleanup();
@@ -113,12 +116,10 @@ public class JavaSoundAudioFactory extends AbstractAudioFactory {
         }
 
         // Now, re-retrieve list of Audio objects and remove the buffers
-        audios = am.getSystemNameList();
-        for (String audioName : audios) {
-            Audio audio = am.getAudio(audioName);
+        for (Audio audio : am.getNamedBeanSet()) {
             if (audio.getSubType() == Audio.BUFFER) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Removing JavaSoundAudioBuffer: " + audioName);
+                    log.debug("Removing JavaSoundAudioBuffer: " + audio.getSystemName());
                 }
                 // Cast to JavaSoundAudioBuffer and cleanup
                 ((JavaSoundAudioBuffer) audio).cleanup();
@@ -126,12 +127,10 @@ public class JavaSoundAudioFactory extends AbstractAudioFactory {
         }
 
         // Lastly, re-retrieve list and remove listener.
-        audios = am.getSystemNameList();
-        for (String audioName : audios) {
-            Audio audio = am.getAudio(audioName);
+        for (Audio audio : am.getNamedBeanSet()) {
             if (audio.getSubType() == Audio.LISTENER) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Removing JavaSoundAudioListener: " + audioName);
+                    log.debug("Removing JavaSoundAudioListener: " + audio.getSystemName());
                 }
                 // Cast to JavaSoundAudioListener and cleanup
                 ((JavaSoundAudioListener) audio).cleanup();
@@ -165,7 +164,7 @@ public class JavaSoundAudioFactory extends AbstractAudioFactory {
     }
 
     /**
-     * Return reference to the current JavaSound mixer object
+     * Return reference to the current JavaSound mixer object.
      *
      * @return current JavaSound mixer
      */

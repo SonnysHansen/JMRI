@@ -13,27 +13,25 @@ import org.junit.Test;
  *
  * @author	Paul Bender Copyright (C) 2012,2016
  */
-public class RfidMessageTest {
+public class RfidMessageTest extends jmri.jmrix.AbstractMessageTestBase {
 
-    @Test
-    public void testCtor() {
-        RfidMessage c = new RfidMessage(20){
+
+    // The minimal setup for log4J
+    @Before
+    @Override
+    public void setUp() {
+        JUnitUtil.setUp();
+        m = new RfidMessage(20){
            @Override
            public String toMonitorString(){
                return "";
            }
         };
-        Assert.assertNotNull(c);
-    }
-
-    // The minimal setup for log4J
-    @Before
-    public void setUp() {
-        JUnitUtil.setUp();
     }
 
     @After
     public void tearDown() {
+	m = null;
         JUnitUtil.tearDown();
     }
 

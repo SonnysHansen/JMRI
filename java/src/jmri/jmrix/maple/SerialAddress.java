@@ -1,6 +1,9 @@
 package jmri.jmrix.maple;
 
+import java.util.Locale;
+import jmri.Manager;
 import jmri.Manager.NameValidity;
+import jmri.NamedBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +50,7 @@ public class SerialAddress {
         // try to parse remaining system name part
         int num = 0;
         try {
-            num = Integer.valueOf(systemName.substring(prefix.length() + 1)).intValue(); // multi char prefix
+            num = Integer.parseInt(systemName.substring(prefix.length() + 1)); // multi char prefix
         } catch (NumberFormatException ex) {
             log.warn("invalid character in number field of system name: {}", systemName);
             return (0);
@@ -57,6 +60,21 @@ public class SerialAddress {
             return (0);
         }
         return (num);
+    }
+
+    /**
+     * Validate the system name.
+     * 
+     * @param name the name to validate
+     * @param manager the manager requesting validation
+     * @param locale the locale for user messages
+     * @return the name; unchanged
+     * @throws IllegalArgumentException if name is not valid
+     * @see Manager#validateSystemNameFormat(java.lang.String, java.util.Locale)
+     */
+    public static String validateSystemNameFormat(String name, Manager<?> manager, Locale locale) throws IllegalArgumentException {
+        int max = manager.typeLetter() == 'S' ? 1000 : 8000;
+        return manager.validateIntegerSystemNameFormat(name, 0, max, locale);
     }
 
     /**

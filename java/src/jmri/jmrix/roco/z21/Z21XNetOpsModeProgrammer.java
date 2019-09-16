@@ -16,9 +16,6 @@ import jmri.jmrix.loconet.LocoNetListener;
 import jmri.jmrix.loconet.LocoNetMessage;
 import jmri.jmrix.loconet.LnTrafficController;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Provides an Ops mode programming interface for Roco Z21 Currently only Byte
  * mode is implemented, though XpressNet also supports bit mode writes for POM
@@ -26,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @see jmri.Programmer
  * @author Paul Bender Copyright (C) 2018
  */
-public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgrammer implements XNetListener, AddressedProgrammer, LocoNetListener {
+public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgrammer implements LocoNetListener {
 
     private int _cv;
     private LnTrafficController lnTC;
@@ -46,11 +43,14 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
         }
     }
 
-    /**
+    /** 
+     * {@inheritDoc}
+     *
      * Send an ops-mode write request to the Xpressnet.
      */
     @Override
-    synchronized public void writeCV(int CV, int val, ProgListener p) throws ProgrammerException {
+    synchronized public void writeCV(String CVname, int val, ProgListener p) throws ProgrammerException {
+        final int CV = Integer.parseInt(CVname);
         XNetMessage msg = XNetMessage.getWriteOpsModeCVMsg(mAddressHigh, mAddressLow, CV, val);
         msg.setBroadcastReply(); // reply comes through a loconet message.
         tc.sendXNetMessage(msg, this);
@@ -64,8 +64,12 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
         restartTimer(msg.getTimeout());
     }
 
+    /** 
+     * {@inheritDoc}
+     */
     @Override
-    synchronized public void readCV(int CV, ProgListener p) throws ProgrammerException {
+    synchronized public void readCV(String CVname, ProgListener p) throws ProgrammerException {
+        final int CV = Integer.parseInt(CVname);
         XNetMessage msg = XNetMessage.getVerifyOpsModeCVMsg(mAddressHigh, mAddressLow, CV, value);
         /* we need to save the programer so we can send messages
          back to the programming screen when we receive
@@ -77,8 +81,11 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
         restartTimer(msg.getTimeout());
     }
 
+    /** 
+     * {@inheritDoc}
+     */
     @Override
-    public void confirmCV(String CVname, int val, ProgListener p) throws ProgrammerException {
+    synchronized public void confirmCV(String CVname, int val, ProgListener p) throws ProgrammerException {
         int CV = Integer.parseInt(CVname);
         XNetMessage msg = XNetMessage.getVerifyOpsModeCVMsg(mAddressHigh, mAddressLow, CV, val);
         tc.sendXNetMessage(msg, this);
@@ -91,6 +98,9 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
         restartTimer(msg.getTimeout());
     }
 
+    /** 
+     * {@inheritDoc}
+     */
     @Override
     synchronized public void message(XNetReply l) {
         if (progState == NOTPROGRAMMING) {
@@ -105,7 +115,7 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
                 new jmri.util.WaitHandler(this,250);
                 progState = NOTPROGRAMMING;
                 stopTimer();
-                progListener.programmingOpReply(value, jmri.ProgListener.OK);
+                notifyProgListenerEnd(progListener, value, jmri.ProgListener.OK);
             } else if (l.getElement(0) == Z21Constants.LAN_X_CV_RESULT_XHEADER
                     && l.getElement(1) == Z21Constants.LAN_X_CV_RESULT_DB0) {
                 // valid operation response, but does it belong to us?
@@ -118,7 +128,7 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
                 stopTimer();
                 // if this was a read, we cached the value earlier.  If its a
                 // write, we're to return the original write value
-                progListener.programmingOpReply(value, jmri.ProgListener.OK);
+                notifyProgListenerEnd(progListener, value, jmri.ProgListener.OK);
                 return;
             } else {
                 /* this is an error */
@@ -130,18 +140,18 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
                     // "data byte not found", e.g. no reply
                     progState = NOTPROGRAMMING;
                     stopTimer();
-                    progListener.programmingOpReply(value, jmri.ProgListener.NoLocoDetected);
+                    notifyProgListenerEnd(progListener, value, jmri.ProgListener.NoLocoDetected);
                     return;
                 } else if (l.getElement(0) == XNetConstants.CS_INFO
                         && l.getElement(1) == XNetConstants.CS_NOT_SUPPORTED) {
                     progState = NOTPROGRAMMING;
                     stopTimer();
-                    progListener.programmingOpReply(value, jmri.ProgListener.NotImplemented);
+                    notifyProgListenerEnd(progListener, value, jmri.ProgListener.NotImplemented);
                 } else {
                     /* this is an unknown error */
                     progState = NOTPROGRAMMING;
                     stopTimer();
-                    progListener.programmingOpReply(value, jmri.ProgListener.UnknownError);
+                    notifyProgListenerEnd(progListener, value, jmri.ProgListener.UnknownError);
                 }
             }
         }
@@ -200,12 +210,12 @@ public class Z21XNetOpsModeProgrammer extends jmri.jmrix.lenz.XNetOpsModeProgram
             progState = NOTPROGRAMMING;
             stopTimer();
             log.debug("sending code {} val {} to programmer",code,val);
-            progListener.programmingOpReply(val, code);
+            notifyProgListenerEnd(progListener, val, code);
         }
     }
 
 
     // initialize logging
-    private final static Logger log = LoggerFactory.getLogger(Z21XNetOpsModeProgrammer.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Z21XNetOpsModeProgrammer.class);
 
 }

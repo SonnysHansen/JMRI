@@ -12,28 +12,26 @@ import org.junit.Test;
  * @author Paul Bender Copyright (C) 2016
  **/
 
-public class SpecificReplyTest {
+public class SpecificReplyTest extends jmri.jmrix.AbstractMessageTestBase {
 
    private SpecificTrafficController tc = null;
 
-   @Test
-   public void ConstructorTest(){
-      Assert.assertNotNull("SpecificReply constructor",new SpecificReply(tc));
-   }
-
    @Before
+   @Override
    public void setUp() {
         JUnitUtil.setUp();
 
         jmri.util.JUnitUtil.initDefaultUserMessagePreferences();
         tc = new SpecificTrafficController(new SpecificSystemConnectionMemo());
+        m = new SpecificReply(tc);
 
    }
 
    @After
    public void tearDown(){
-        JUnitUtil.tearDown();
         tc = null;
+	m = null;
+        JUnitUtil.tearDown();
    }
 
 }

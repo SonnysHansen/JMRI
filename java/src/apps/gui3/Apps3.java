@@ -1,5 +1,6 @@
 package apps.gui3;
 
+import apps.gui3.tabbedpreferences.TabbedPreferencesAction;
 import apps.AppsBase;
 import apps.SplashWindow;
 import apps.SystemConsole;
@@ -45,11 +46,11 @@ import org.slf4j.LoggerFactory;
  * This is a complete re-implementation of the apps.Apps support for JMRI
  * applications.
  * <p>
- * Each using application provides it's own main() method.
+ * Each using application provides its own main() method.
  * <p>
  * There are a large number of missing features marked with TODO in comments
  * including code from the earlier implementation.
- * <P>
+ *
  * @author Bob Jacobsen Copyright 2009, 2010
  */
 public abstract class Apps3 extends AppsBase {
@@ -151,24 +152,6 @@ public abstract class Apps3 extends AppsBase {
         //A Shutdown manager handles the quiting of the application
         mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         displayMainFrame(mainFrame.getMaximumSize());
-    }
-
-    /**
-     * Provides a list of {@link apps.startup.AbstractActionModel} objects that
-     * could be used with the implementing class in {@link #addToActionModel()}.
-     *
-     * @return the list of action models.
-     * @deprecated since 4.5.3
-     */
-    @Deprecated
-    protected ResourceBundle getActionModelResourceBundle() { return null; }
-
-    /**
-     * @deprecated since 4.5.1
-     */
-    @Deprecated
-    protected final void addToActionModel() {
-        // StartupActionModelUtil populates itself, so do nothing
     }
 
     /**
@@ -354,7 +337,11 @@ public abstract class Apps3 extends AppsBase {
             // Apps.setConfigFilename() does not reset the system property
             System.setProperty("org.jmri.Apps.configFilename", Profile.CONFIG_FILENAME);
             Profile profile = ProfileManager.getDefault().getActiveProfile();
-            log.info("Starting with profile {}", profile.getId());
+            if (profile != null) {
+                log.info("Starting with profile {}", profile.getId());
+            } else {
+                log.info("Starting without a profile");
+            }
 
             // rapid language set; must follow up later with full setting as part of preferences
             apps.gui.GuiLafPreferencesManager.setLocaleMinimally(profile);
@@ -377,10 +364,10 @@ public abstract class Apps3 extends AppsBase {
         super.setAndLoadPreferenceFile();
         if (sharedConfig == null && configOK == true && configDeferredLoadOK == true) {
             // this was logged in the super method
-            Profile profile = ProfileManager.getDefault().getActiveProfile();
+            String name = ProfileManager.getDefault().getActiveProfileName();
             if (!GraphicsEnvironment.isHeadless()) {
                 JOptionPane.showMessageDialog(sp,
-                        Bundle.getMessage("SingleConfigMigratedToSharedConfig", profile.getName()),
+                        Bundle.getMessage("SingleConfigMigratedToSharedConfig", name),
                         jmri.Application.getApplicationName(),
                         JOptionPane.INFORMATION_MESSAGE);
             }

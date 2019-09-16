@@ -290,7 +290,6 @@ public class DecoratorPanel extends JPanel implements ChangeListener {
         _samplePanel.add(Box.createHorizontalStrut(STRUT));
     }
 
-    @SuppressWarnings("unchecked")
     private void makeFontPanels() {
         ActionListener fontAction = ((ActionEvent event) -> {
             fontChange(); // callback
@@ -485,7 +484,6 @@ public class DecoratorPanel extends JPanel implements ChangeListener {
     /**
      * Create panel element containing [Set background:] drop down list.
      * Special version for Decorator, no access to shared variable previewBgSet.
-     * @see jmri.jmrit.catalog.PreviewDialog#setupPanel()
      * @see ItemPanel
      *
      * @param preview1 ImagePanel containing icon set
@@ -714,5 +712,4 @@ public class DecoratorPanel extends JPanel implements ChangeListener {
     }
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DecoratorPanel.class);
-
 }

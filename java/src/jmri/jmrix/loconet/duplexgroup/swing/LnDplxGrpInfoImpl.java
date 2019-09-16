@@ -155,7 +155,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * A valid Duplex Group Name is an 8 character string. The calling method
      * should append spaces or truncate to give correct length if necessary.
      *
-     * @param sGroupName - string containing group name to be validated
+     * @param sGroupName  string containing group name to be validated
      * @return true if and only if groupName is a valid Duplex Group Name
      */
     public static final boolean validateGroupName(String sGroupName) {
@@ -171,13 +171,12 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * allowed, or must be four characters, each of pattern [0-9A-C] if
      * alphanumeric values are allowed. (See private field
      * limitPasswordToNumericCharacters.)
-     * <p>
-     * @param sGroupPassword - Duplex Group Password to be validated
+     *
+     * @param sGroupPassword  Duplex Group Password to be validated
      * @return true if and only if sGroupPassword is a valid Duplex Group
      *         Password.
      */
-    // TODO: This warning is suppressed for now, but there is no way currently to set limitPasswordToNumericCharacters to true
-    @SuppressWarnings("unused")
+    // TODO: There is no way currently to set limitPasswordToNumericCharacters to true
     public static final boolean validateGroupPassword(String sGroupPassword) {
         // force the value to uppercase
         if (sGroupPassword.length() == 0) {
@@ -190,8 +189,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
 
     /**
      * Validate a Duplex Group Channel Number.
-     * <p>
-     * @param iGroupChannel - Duplex Group Channel number to be validated
+     *
+     * @param iGroupChannel  Duplex Group Channel number to be validated
      * @return true if and only if iGroupChannel is a valid Duplex Group
      *         Channel.
      */
@@ -206,8 +205,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
 
     /**
      * Validate the parameter as a Duplex Group ID number.
-     * <p>
-     * @param iGroupId - Duplex Group ID number to be validated
+     *
+     * @param iGroupId  Duplex Group ID number to be validated
      * @return true if and only if iGroupId is a valid Duplex Group ID.
      */
     public static final boolean validateGroupID(Integer iGroupId) {
@@ -441,13 +440,13 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * Checks message m to determine if it contains a Duplex Group Identity
      * message, including queries, reports, and writes, for Name, Channel,
      * Password, and ID.
-     * <p>
-     * @param m - LocoNet message to check
+     *
+     * @param m  LocoNet message to check
      * @return true if message is query, report, or write of Duplex Group Name,
      *         Channel, Password or ID
      */
     public static final boolean isDuplexGroupMessage(LocoNetMessage m) {
-        if ((m.getElement(0) == LnConstants.OPC_PEER_XFER)
+        if ((m.getOpCode() == LnConstants.OPC_PEER_XFER)
                 && (m.getElement(1) == LnConstants.RE_DPLX_OP_LEN)) {
             // Message is a peer-to-peer message of appropriate length for
             // Duplex Group operations.  Check the individual message type
@@ -487,7 +486,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      *         DUPLEX_GROUP_ID_REPORT_MESSAGE DUPLEX_GROUP_ID_WRITE_MESSAGE
      */
     public static final DuplexGroupMessageType getDuplexGroupIdentityMessageType(LocoNetMessage m) {
-        if ((m.getElement(0) == LnConstants.OPC_PEER_XFER)
+        if ((m.getOpCode() == LnConstants.OPC_PEER_XFER)
                 && (m.getElement(1) == LnConstants.RE_DPLX_OP_LEN)) {
             // Message is a peer-to-peer message of appropriate length for
             // Duplex Group operations.  Check the individual message type
@@ -526,8 +525,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * characters long.
      * <p>
      * If m does not contain a Duplex Group Name, returns null.
-     * <p>
-     * @param m - LocoNet message from which a Duplex Group Name is to be extracted.
+     *
+     * @param m  LocoNet message from which a Duplex Group Name is to be extracted.
      * @return String containing Duplex Group Name as extracted from m
      */
     public static String extractDuplexGroupName(LocoNetMessage m) {
@@ -577,8 +576,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * then extracts and returns the Duplex Group Channel.
      * <p>
      * Returns -1 if the m does not contain a Duplex Group Channel.
-     * <p>
-     * @param m - LocoNet message from which a Duplex Group Channel number will
+     *
+     * @param m  LocoNet message from which a Duplex Group Channel number will
      *          be extracted
      * @return Integer containing Duplex Group Name as extracted from m
      */
@@ -601,8 +600,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * extracts and returns the Duplex Group ID.
      * <p>
      * Returns -1 if the m does not contain a Duplex Group ID.
-     * <p>
-     * @param m - LocoNet message from which a Duplex Group ID will be extracted
+     *
+     * @param m  LocoNet message from which a Duplex Group ID will be extracted
      * @return Integer containing Duplex Group Name as extracted from m
      */
     public static int extractDuplexGroupID(LocoNetMessage m) {
@@ -624,8 +623,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * then extracts and returns the Duplex Group Password.
      * <p>
      * Returns null if the m does not contain a Duplex Group Password.
-     * <p>
-     * @param m - LocoNet message to be checked for a duplex group password message
+     *
+     * @param m  LocoNet message to be checked for a duplex group password message
      * @return String containing the Duplex Group Password as extracted from m
      */
     public static String extractDuplexGroupPassword(LocoNetMessage m) {
@@ -775,6 +774,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * @return true if message is an IPL device report indicating a UR92
      *         present, else return false.
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(value = "DLS_DEAD_LOCAL_STORE",
+                justification = "False positive on the implied local variable in numUr92++")
     private boolean handleMessageIplResult(LocoNetMessage m) {
         if (LnIPLImplementation.isIplUr92IdentityReportMessage(m)) {
             numUr92++;
@@ -788,11 +789,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
     }
 
     private boolean handleMessageDuplexInfoQuery(LocoNetMessage m) {
-        if (getDuplexGroupIdentityMessageType(m) == DuplexGroupMessageType.DUPLEX_GROUP_NAME_QUERY_MESSAGE) {
-            return true;
-        } else {
-            return false;
-        }
+        return (getDuplexGroupIdentityMessageType(m) == DuplexGroupMessageType.DUPLEX_GROUP_NAME_QUERY_MESSAGE);
     }
 
     /**
@@ -814,16 +811,14 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
             // remove trailing spaces from name
             i = (gr_name.length() - 1);
             while ((gr_name.charAt(i) == ' ') && (i > 0)) {
-                if (i > 0) {
-                    gr_name = gr_name.substring(0, i);
-                }
+                gr_name = gr_name.substring(0, i);
                 i--;
             }
             gr_password = extractDuplexGroupPassword(m);
             gr_ch = extractDuplexGroupChannel(m);
             gr_id = extractDuplexGroupID(m);
 
-            if (awaitingGroupReadReport == true) {
+            if (awaitingGroupReadReport) {
                 awaitingGroupReadReport = false;
                 acceptedGroupName = gr_name;
                 acceptedGroupChannel = Integer.toString(gr_ch, LnDplxGrpInfoImplConstants.GENERAL_DECIMAL_RADIX);
@@ -887,7 +882,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
     /**
      * Creates and sends a LocoNet message which sets the Duplex Group Name.
      *
-     * @param dgn - String containing the new Duplex Group Name
+     * @param dgn  String containing the new Duplex Group Name
      * @throws jmri.jmrix.loconet.LocoNetException if dgn is not a valid Duplex
      *                                             Group Name.
      */
@@ -900,7 +895,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
     /**
      * Creates and sends a LocoNet message which sets the Duplex Group Channel.
      *
-     * @param dgc - Integer containing the new Duplex Group Channel
+     * @param dgc  Integer containing the new Duplex Group Channel
      * @throws jmri.jmrix.loconet.LocoNetException if dgc is not a valid Duplex
      *                                             Group Channel number.
      */
@@ -912,7 +907,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
     /**
      * Creates and sends a LocoNet message which sets the Duplex Group Password.
      *
-     * @param dgp - String containing the new Duplex Group Password
+     * @param dgp  String containing the new Duplex Group Password
      * @throws jmri.jmrix.loconet.LocoNetException if dgp is not a valid Duplex
      *                                             Group Password.
      */
@@ -924,7 +919,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
     /**
      * Creates and sends a LocoNet message which sets the Duplex Group Id.
      *
-     * @param dgi - String containing the new Duplex Group Id
+     * @param dgi  String containing the new Duplex Group Id
      * @throws jmri.jmrix.loconet.LocoNetException if dgi is not a valid Duplex
      *                                             Group Id.
      */
@@ -1153,7 +1148,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * <p>
      * Note that code should ignore the value returned by this method
      * if isWaitingForUr92DeviceReports() is true;
-     * <p>
+     *
      * @return the number of UR92 devices which reported in response to the
      *      LocoNet IPL device query which is sent by this class.
      */
@@ -1165,7 +1160,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
      * Reports whether this class is currently waiting for the first UR92 LocoNet
      * IPL Device Report messages in response to a LocoNet IPL Device Query for
      * UR92s sent by this class.
-     * <p>
+     *
      * @return true if the class is waiting for LocoNet IPL reply messages, else
      *      false.
      */
@@ -1176,7 +1171,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
 
     /**
      * Reports the number of LocoNet messages handled since object construction.
-     * <p>
+     *
      * @return the number of LocoNet messages since this object was constructed.
      */
     public int getMessagesHandled() {
@@ -1185,7 +1180,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
 
     /**
      * Reports whether the IPL query timer is running.
-     * <p>
+     *
      * @return true if the timer is running, else false.
      */
     public boolean isIplQueryTimerRunning() {
@@ -1194,7 +1189,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
 
     /**
      * Reports whether the Duplex Group Info query timer is running.
-     * <p>
+     *
      * @return true if the timer is running, else false.
      */
     public boolean isDuplexGroupQueryRunning() {
@@ -1204,7 +1199,7 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
     /**
      * Reports whether this object is currently waiting for
      * Duplex Group Name, etc. Report message.
-     * <p>
+     *
      * @return true if currently waiting, else false
      */
     public boolean isAwaitingDuplexGroupReportMessage() {
@@ -1233,8 +1228,8 @@ public class LnDplxGrpInfoImpl extends javax.swing.JComponent implements jmri.jm
 
     /**
      * Connect this instance's LocoNetListener to the LocoNet Traffic Controller
-     * <p>
-     * @param t - LocoNet traffic controller
+     *
+     * @param t  LocoNet traffic controller
      */
     public void connect(jmri.jmrix.loconet.LnTrafficController t) {
         if (t != null) {

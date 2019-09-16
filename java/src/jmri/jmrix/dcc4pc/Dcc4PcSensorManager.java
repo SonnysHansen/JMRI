@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
  * Implement SensorManager for Dcc4Pc systems. The Manager handles all the state
  * changes.
  * <p>
- * System names are "DPnn:yy", where nnn is the board id and yy is the port on
- * that board.
+ * System names are "DSnn:yy", where D is the user configurable system prefix,
+ * nn is the board id and yy is the port on that board.
  *
  * @author Kevin Dickerson Copyright (C) 2009
  */
@@ -26,8 +26,8 @@ public class Dcc4PcSensorManager extends jmri.managers.AbstractSensorManager
         implements Dcc4PcListener {
 
     public Dcc4PcSensorManager(Dcc4PcTrafficController tc, Dcc4PcSystemConnectionMemo memo) {
+        super(memo);
         this.tc = tc;
-        this.memo = memo;
         this.reportManager = memo.get(jmri.ReporterManager.class);
         jmri.InstanceManager.store(this, Dcc4PcSensorManager.class);
         this.boardManager = new Dcc4PcBoardManager(tc, this);
@@ -47,7 +47,6 @@ public class Dcc4PcSensorManager extends jmri.managers.AbstractSensorManager
     Dcc4PcBoardManager boardManager;
 
     Dcc4PcTrafficController tc;
-    Dcc4PcSystemConnectionMemo memo;
 
     @Override
     public Dcc4PcSensor getSensor(String name) {
@@ -55,9 +54,12 @@ public class Dcc4PcSensorManager extends jmri.managers.AbstractSensorManager
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String getSystemPrefix() {
-        return memo.getSystemPrefix();
+    public Dcc4PcSystemConnectionMemo getMemo() {
+        return (Dcc4PcSystemConnectionMemo) memo;
     }
 
     @Override
@@ -79,7 +81,7 @@ public class Dcc4PcSensorManager extends jmri.managers.AbstractSensorManager
             systemName = systemName.substring(indexOfSplit);
             int boardNo;
             try {
-                boardNo = Integer.valueOf(systemName);
+                boardNo = Integer.parseInt(systemName);
             } catch (NumberFormatException ex) {
                 log.error("Unable to find the board address from system name {}", systemName);
                 return;
@@ -103,14 +105,14 @@ public class Dcc4PcSensorManager extends jmri.managers.AbstractSensorManager
             // Address format passed is in the form of board:channel or T:turnout address
             int seperator = curAddress.indexOf(":");
             try {
-                board = Integer.valueOf(curAddress.substring(0, seperator));
+                board = Integer.parseInt(curAddress.substring(0, seperator));
             } catch (NumberFormatException ex) {
                 log.error("Unable to convert {} into the cab and channel format of nn:xx", curAddress);
                 throw new JmriException("Hardware Address passed should be a number");
             }
 
             try {
-                channel = Integer.valueOf(curAddress.substring(seperator + 1));
+                channel = Integer.parseInt(curAddress.substring(seperator + 1));
                 if ((channel > 16) || (channel < 1)) {
                     log.error("Channel number is out of range");
                     throw new JmriException("Channel number should be in the range of 1 to 16");
@@ -945,7 +947,7 @@ public class Dcc4PcSensorManager extends jmri.managers.AbstractSensorManager
 
                         } else if ((packet[i] >> 3) == 0x00) {
                             // This should fall through to 00000 three byte instruction
-                            i = i + 2;
+                            // i = i + 2;
 
                         } else {
                             // Remainder are reserved

@@ -14,14 +14,16 @@ public class TamsOpsModeProgrammerTest extends jmri.jmrix.AbstractOpsModeProgram
 
     // The minimal setup for log4J
     @Before
+    @Override
     public void setUp() {
         JUnitUtil.setUp();
-        TamsTrafficController tc = new TamsTrafficController();
+        TamsTrafficController tc = new TamsInterfaceScaffold();
         TamsOpsModeProgrammer t = new TamsOpsModeProgrammer(tc,1234,true);
         programmer = t;
     }
 
     @After
+    @Override
     public void tearDown() {
         programmer = null;
         JUnitUtil.tearDown();

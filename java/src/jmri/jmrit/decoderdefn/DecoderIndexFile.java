@@ -28,13 +28,13 @@ import org.slf4j.LoggerFactory;
 // try to limit the JDOM to this class, so that others can manipulate...
 /**
  * DecoderIndex represents a decoderIndex.xml file in memory.
- * <P>
+ * <p>
  * This allows a program to navigate to various decoder descriptions without
  * having to manipulate files.
- * <P>
+ * <p>
  * This class doesn't provide tools for defining the index; that's done
  * manually, or at least not done here.
- * <P>
+ * <p>
  * Multiple DecoderIndexFile objects don't make sense, so we use an "instance"
  * member to navigate to a single one.
  *
@@ -228,17 +228,6 @@ public class DecoderIndexFile extends XmlFile {
     }
 
     /**
-     *
-     * @return the managed instance
-     * @deprecated since 4.9.2; use
-     * {@link jmri.InstanceManager#getDefault(java.lang.Class)} instead
-     */
-    @Deprecated
-    public synchronized static DecoderIndexFile instance() {
-        return InstanceManager.getDefault(DecoderIndexFile.class);
-    }
-
-    /**
      * Check whether the user's version of the decoder index file needs to be
      * updated; if it does, then forces the update.
      *
@@ -419,7 +408,6 @@ public class DecoderIndexFile extends XmlFile {
         }
     }
 
-    @SuppressWarnings("unchecked")
     void readMfgSection(Element decoderIndex) {
         Element mfgList = decoderIndex.getChild("mfgList");
         if (mfgList != null) {
@@ -458,7 +446,6 @@ public class DecoderIndexFile extends XmlFile {
         }
     }
 
-    @SuppressWarnings("unchecked")
     void readFamilySection(Element decoderIndex) {
         Element familyList = decoderIndex.getChild("familyList");
         if (familyList != null) {
@@ -475,7 +462,6 @@ public class DecoderIndexFile extends XmlFile {
         }
     }
 
-    @SuppressWarnings("unchecked")
     void readFamily(Element family) {
         Attribute attr;
         String filename = family.getAttribute("file").getValue();
@@ -554,7 +540,7 @@ public class DecoderIndexFile extends XmlFile {
         // create root element and document
         Element root = new Element("decoderIndex-config");
         root.setAttribute("noNamespaceSchemaLocation",
-                "http://jmri.org/xml/schema/decoder.xsd",
+                "http://jmri.org/xml/schema/decoder-4-15-2.xsd",
                 org.jdom2.Namespace.getNamespace("xsi",
                         "http://www.w3.org/2001/XMLSchema-instance"));
 
@@ -620,6 +606,9 @@ public class DecoderIndexFile extends XmlFile {
                 log.error("could not read {}: {}", fileName, exj.getMessage());
             } catch (IOException exj) {
                 log.error("other exception while dealing with {}: {}", fileName, exj.getMessage());
+            } catch (Exception exq) {
+                log.error("exception reading {}", fileName, exq);
+                throw exq;
             }
         }
 

@@ -2,13 +2,14 @@ package jmri.jmrix.nce;
 
 import jmri.JmriException;
 import jmri.jmrix.AbstractPowerManagerTestBase;
+import jmri.util.junit.annotations.*;
 import org.junit.*;
 
 /**
  * JUnit tests for the NcePowerManager class.
  *
  * @author	Bob Jacobsen
-  */
+ */
 public class NcePowerManagerTest extends AbstractPowerManagerTestBase {
 
     // service routines to simulate receiving on, off from interface
@@ -35,6 +36,17 @@ public class NcePowerManagerTest extends AbstractPowerManagerTestBase {
     }
 
     @Override
+    protected void sendIdleReply() {
+        NceReply l = new NceReply(controller);
+        controller.sendTestReply(l);
+    }
+
+    @Override
+    protected void hearIdle() {
+        // this does nothing, as there is no unsolicited on
+    }
+
+    @Override
     protected int numListeners() {
         return controller.numListeners();
     }
@@ -51,6 +63,11 @@ public class NcePowerManagerTest extends AbstractPowerManagerTestBase {
 
     @Override
     protected boolean outboundOffOK(int index) {
+        return controller.outbound.elementAt(index).isKillMain();
+    }
+
+    @Override
+    protected boolean outboundIdleOK(int index) {
         return controller.outbound.elementAt(index).isKillMain();
     }
 
@@ -77,13 +94,13 @@ public class NcePowerManagerTest extends AbstractPowerManagerTestBase {
     // state readback by sending messages & getting a reply
     @Override
     @Test
-    @Ignore("no unsolicted message, so do not run test")
+    @NotApplicable("no unsolicted message, so do not run test")
     public void testStateOn() throws JmriException {
     }
 
     @Override
     @Test
-    @Ignore("no unsolicted message, so do not run test")
+    @NotApplicable("no unsolicted message, so do not run test")
     public void testStateOff() throws JmriException {
     }
 
